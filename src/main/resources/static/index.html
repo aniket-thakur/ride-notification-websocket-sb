@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>Ride Request Notification System</title>
+    <style>
+        :root {
+          --primary-color: #4CAF50;
+          --danger-color: #f44336;
+          --warning-color: #ff9800;
+          --info-color: #2196F3;
+          --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          --card-bg: #ffffff;
+          --text-primary: #333333;
+          --text-secondary: #666666;
+          --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+          --pickup-color: #2196F3;
+          --dropoff-color: #4CAF50;
+        }
+
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: var(--background);
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+
+        /* Login/Username Section */
+        #username-page {
+          background: var(--card-bg);
+          border-radius: 20px;
+          padding: 40px;
+          box-shadow: var(--shadow);
+          max-width: 400px;
+          width: 100%;
+          text-align: center;
+          animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .title {
+          color: var(--text-primary);
+          margin-bottom: 30px;
+          font-size: 28px;
+          font-weight: 700;
+        }
+
+        .subtitle {
+          color: var(--text-secondary);
+          margin-bottom: 20px;
+          font-size: 14px;
+        }
+
+        .form-group {
+          margin-bottom: 20px;
+        }
+
+        .form-control {
+          width: 100%;
+          padding: 15px;
+          border: 2px solid #e0e0e0;
+          border-radius: 10px;
+          font-size: 16px;
+          transition: all 0.3s;
+        }
+
+        .form-control:focus {
+          outline: none;
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .btn {
+          padding: 15px 30px;
+          border: none;
+          border-radius: 10px;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+          width: 100%;
+        }
+
+        .btn-primary {
+          background: var(--primary-color);
+          color: white;
+        }
+
+        .btn-primary:hover {
+          background: #45a049;
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        /* Main Dashboard */
+        #dashboard-page {
+          background: var(--card-bg);
+          border-radius: 20px;
+          padding: 30px;
+          box-shadow: var(--shadow);
+          max-width: 1000px;
+          width: 100%;
+          animation: slideIn 0.5s ease;
+        }
+
+        .dashboard-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 30px;
+          padding-bottom: 20px;
+          border-bottom: 2px solid #f0f0f0;
+        }
+
+        .user-info {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+        }
+
+        .user-avatar {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #667eea, #764ba2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: bold;
+          font-size: 20px;
+        }
+
+        .user-details h3 {
+          color: var(--text-primary);
+          margin-bottom: 5px;
+        }
+
+        .status {
+          display: inline-block;
+          padding: 5px 10px;
+          border-radius: 20px;
+          font-size: 12px;
+          font-weight: 600;
+        }
+
+        .status-online {
+          background: #e8f5e9;
+          color: var(--primary-color);
+        }
+
+        .btn-logout {
+          padding: 10px 20px;
+          background: var(--danger-color);
+          color: white;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: all 0.3s;
+          font-size: 14px;
+        }
+
+        .btn-logout:hover {
+          background: #da190b;
+        }
+
+        /* Notifications Area */
+        .notifications-container {
+          margin-top: 20px;
+        }
+
+        .section-title {
+          color: var(--text-primary);
+          margin-bottom: 20px;
+          font-size: 22px;
+          font-weight: 600;
+        }
+
+        #notificationArea {
+          max-height: 600px;
+          overflow-y: auto;
+          padding-right: 10px;
+        }
+
+        /* Scrollbar styling */
+        #notificationArea::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        #notificationArea::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 10px;
+        }
+
+        #notificationArea::-webkit-scrollbar-thumb {
+          background: #888;
+          border-radius: 10px;
+        }
+
+        #notificationArea::-webkit-scrollbar-thumb:hover {
+          background: #555;
+        }
+
+        /* Ride Request Card */
+        .ride-request {
+          background: linear-gradient(to right, #f8f9fa 0%, #ffffff 100%);
+          border-radius: 15px;
+          padding: 20px;
+          margin-bottom: 20px;
+          border-left: 4px solid var(--info-color);
+          animation: slideInRight 0.5s ease;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .ride-request:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        @keyframes slideInRight {
+          from {
+            opacity: 0;
+            transform: translateX(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        .ride-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+          padding-bottom: 15px;
+          border-bottom: 1px solid #e9ecef;
+        }
+
+        .ride-type {
+          background: linear-gradient(135deg, var(--info-color), #1976D2);
+          color: white;
+          padding: 8px 20px;
+          border-radius: 25px;
+          font-size: 14px;
+          font-weight: 600;
+          box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+        }
+
+        .ride-time {
+          color: var(--text-secondary);
+          font-size: 14px;
+          font-style: italic;
+        }
+
+        .ride-details {
+          margin-bottom: 20px;
+        }
+
+        .ride-info {
+          display: flex;
+          align-items: flex-start;
+          margin-bottom: 15px;
+          color: var(--text-primary);
+          padding: 12px;
+          background: #f8f9fa;
+          border-radius: 10px;
+          transition: background 0.3s ease;
+        }
+
+        .ride-info:hover {
+          background: #e9ecef;
+        }
+
+        .ride-info i {
+          margin-right: 15px;
+          width: 24px;
+          font-size: 20px;
+          flex-shrink: 0;
+          margin-top: 2px;
+        }
+
+        .ride-info div {
+          flex: 1;
+        }
+
+        .ride-info strong {
+          display: block;
+          margin-bottom: 5px;
+          color: var(--text-primary);
+          font-size: 14px;
+        }
+
+        .ride-info span {
+          color: var(--text-secondary);
+          font-size: 13px;
+          line-height: 1.4;
+        }
+
+        /* Special styling for location cards */
+        .pickup-location {
+          background: linear-gradient(135deg, rgba(33, 150, 243, 0.08), rgba(33, 150, 243, 0.03));
+          border: 1px solid rgba(33, 150, 243, 0.2);
+        }
+
+        .drop-location {
+          background: linear-gradient(135deg, rgba(76, 175, 80, 0.08), rgba(76, 175, 80, 0.03));
+          border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+
+        .coordinates {
+          display: flex;
+          gap: 15px;
+          margin-top: 5px;
+        }
+
+        .coord-item {
+          background: white;
+          padding: 4px 8px;
+          border-radius: 6px;
+          font-family: 'Courier New', monospace;
+          font-size: 12px;
+          border: 1px solid #e0e0e0;
+        }
+
+        /* Distance and Fare badges */
+        .info-badges {
+          display: flex;
+          gap: 15px;
+          margin-top: 15px;
+          padding-top: 15px;
+          border-top: 1px solid #e9ecef;
+        }
+
+        .info-badge {
+          flex: 1;
+          text-align: center;
+          padding: 10px;
+          background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+          border-radius: 10px;
+        }
+
+        .info-badge-label {
+          font-size: 12px;
+          color: var(--text-secondary);
+          margin-bottom: 5px;
+        }
+
+        .info-badge-value {
+          font-size: 18px;
+          font-weight: bold;
+          color: var(--text-primary);
+        }
+
+        .ride-actions {
+          display: flex;
+          gap: 10px;
+        }
+
+        .btn-accept {
+          flex: 1;
+          background: linear-gradient(135deg, var(--primary-color), #45a049);
+          color: white;
+          padding: 12px;
+          border-radius: 10px;
+          border: none;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+          box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-accept:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-decline {
+          flex: 1;
+          background: linear-gradient(135deg, var(--danger-color), #da190b);
+          color: white;
+          padding: 12px;
+          border-radius: 10px;
+          border: none;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+          box-shadow: 0 2px 10px rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-decline:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+        }
+
+        /* Empty State */
+        .empty-state {
+          text-align: center;
+          padding: 60px 40px;
+          color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+          font-size: 60px;
+          margin-bottom: 20px;
+          opacity: 0.5;
+        }
+
+        .empty-state p:first-of-type {
+          font-size: 18px;
+          font-weight: 500;
+          margin-bottom: 10px;
+        }
+
+        /* Connection Status */
+        .connection-status {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          padding: 10px 20px;
+          border-radius: 25px;
+          font-size: 14px;
+          font-weight: 600;
+          animation: slideIn 0.5s ease;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .connecting {
+          background: var(--warning-color);
+          color: white;
+        }
+
+        .connected {
+          background: var(--primary-color);
+          color: white;
+        }
+
+        .disconnected {
+          background: var(--danger-color);
+          color: white;
+        }
+
+        .hidden {
+          display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+          #dashboard-page {
+            padding: 20px;
+            border-radius: 0;
+          }
+
+          .dashboard-header {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+          }
+
+          .ride-actions {
+            flex-direction: column;
+          }
+
+          .info-badges {
+            flex-direction: column;
+            gap: 10px;
+          }
+
+          .coordinates {
+            flex-direction: column;
+            gap: 5px;
+          }
+
+          .ride-request {
+            padding: 15px;
+          }
+        }
+    </style>
+</head>
+<body>
+<!-- Connection Status Indicator -->
+<div id="connectionStatus" class="connection-status hidden">
+    <span id="statusText">Connecting...</span>
+</div>
+
+<!-- Login/Username Section -->
+<div id="username-page">
+    <h1 class="title">🚗 Ride Request System</h1>
+    <p class="subtitle">Enter your driver ID to start receiving ride requests</p>
+    <form id="usernameForm">
+        <div class="form-group">
+            <input
+                    type="text"
+                    id="driverId"
+                    class="form-control"
+                    placeholder="Enter Driver ID (e.g., DRIVER001)"
+                    required
+            />
+        </div>
+        <button type="submit" class="btn btn-primary">
+            Connect to Dispatch
+        </button>
+    </form>
+</div>
+
+<!-- Main Dashboard -->
+<div id="dashboard-page" class="hidden">
+    <div class="dashboard-header">
+        <div class="user-info">
+            <div class="user-avatar" id="userAvatar">D</div>
+            <div class="user-details">
+                <h3 id="driverName">Driver</h3>
+                <span class="status status-online">🟢 Online</span>
+            </div>
+        </div>
+        <button class="btn-logout" onclick="disconnect()">
+            ⚡ Disconnect
+        </button>
+    </div>
+
+    <div class="notifications-container">
+        <h2 class="section-title">📍 Incoming Ride Requests</h2>
+        <div id="notificationArea">
+            <div class="empty-state">
+                <div class="empty-state-icon">🚕</div>
+                <p>No ride requests at the moment</p>
+                <p style="font-size: 14px; margin-top: 10px;">New requests will appear here automatically</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- WebSocket Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script src="./js/main.js"></script>
+</body>
+</html>

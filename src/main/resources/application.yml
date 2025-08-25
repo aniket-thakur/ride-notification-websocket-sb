@@ -1,0 +1,7 @@
+#spring.application.name=web-socket-req
+spring:
+  application:
+    name: web-socket-req
+server:
+  port: 8778
+
