@@ -56,6 +56,9 @@ function onConnected() {
     // Subscribe to broadcast channel for public messages
     stompClient.subscribe('/topic/public', onPublicMessageReceived);
 
+    //Subscribe to broadcast channel for public message
+    stompClient.subscribe('/topic/ride/removed',onRideRequestRemoved)
+
     // Notify server that driver is online
     stompClient.send("/app/driver.connect",
         {},
@@ -90,6 +93,25 @@ function onRideRequestReceived(payload) {
     // Display the request
     displayRideRequest(rideRequest);
 }
+
+// Handle ride request removed
+function onRideRequestRemoved(payload){
+    const bookingId = JSON.parse(payload.body);
+    // Update UI
+    const requestElement = document.getElementById(`request-${bookingId}`);
+    // Remove after 1 seconds
+    setTimeout(() => {
+        requestElement.style.opacity = '0';
+        setTimeout(() => {
+            requestElement.remove();
+            checkEmptyState();
+        }, 300);
+    }, 1000);
+
+    // Remove from local storage
+    rideRequests.delete(bookingId);
+    console.log(`Removed ride with booking ID: ${bookingId} as someone Accepted it`);
+ }
 
 // Handle public messages (driver status updates)
 function onPublicMessageReceived(payload) {

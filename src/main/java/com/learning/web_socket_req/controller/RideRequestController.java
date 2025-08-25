@@ -37,7 +37,7 @@ public class RideRequestController {
     public DriverStatus driverConnect(@Payload DriverStatus status, SimpMessageHeaderAccessor headerAccessor) {
         String sessionID = headerAccessor.getSessionId();
         String driverId = status.getDriverId();
-        sessionHandler.putDriverIdWithSession(driverId,sessionID);
+        sessionHandler.putDriverIdWithSession(driverId, sessionID);
         System.out.println("Driver connected: " + status.getDriverId());
         headerAccessor.getSessionAttributes().put("driverId", driverId);
         return status;
@@ -59,11 +59,11 @@ public class RideRequestController {
         String driverId = response.getDriverId();
         String status = String.valueOf(response.getStatus());
         Timestamp timestamp = response.getTimestamp();
-        System.out.println("Ride accepted by: "+ driverId);
+        System.out.println("Ride accepted by: " + driverId);
         System.out.println("Info:");
-        System.out.println("Request id: " + requestId +" Booking id: "+ bookingId+
-                " Status: "+ status + " Timestamp: "+ timestamp);
-
+        System.out.println("Request id: " + requestId + " Booking id: " + bookingId +
+                " Status: " + status + " Timestamp: " + timestamp);
+        messagingTemplate.convertAndSend("/topic/ride/removed", bookingId);
     }
 
     // Decline ride
@@ -84,7 +84,7 @@ public class RideRequestController {
     // Method to send ride request to specific driver
     @PostMapping("/notify")
     public String sendRideRequestToDriver(@RequestBody RideRequestDto request) {
-        System.out.println("Request"+ request.toString());
+        System.out.println("Request" + request.toString());
         Map<String, String> activeDrivers = sessionHandler.getAllConnectedDrivers();
         for (Map.Entry<String, String> e : activeDrivers.entrySet()) {
             String driverId = e.getKey();
@@ -98,4 +98,7 @@ public class RideRequestController {
         }
         return "Sent to all drivers";
     }
+
 }
+
+
