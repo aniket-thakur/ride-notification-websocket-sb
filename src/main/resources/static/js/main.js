@@ -5,6 +5,7 @@ const usernamePage = document.querySelector('#username-page');
 const dashboardPage = document.querySelector('#dashboard-page');
 const usernameForm = document.querySelector('#usernameForm');
 const driverIdInput = document.querySelector('#driverId');
+const driverNameInput = document.querySelector('#name');
 const notificationArea = document.querySelector('#notificationArea');
 const connectionStatus = document.querySelector('#connectionStatus');
 const statusText = document.querySelector('#statusText');
@@ -14,6 +15,7 @@ const userAvatar = document.querySelector('#userAvatar');
 // WebSocket variables
 let stompClient = null;
 let driverId = null;
+let driverName = null;
 let sessionId = null;
 let rideRequests = new Map(); // Store active ride requests
 
@@ -22,6 +24,7 @@ function connect(event) {
     event.preventDefault();
 
     driverId = driverIdInput.value.trim();
+    driverName = driverNameInput.value.trim();
 
     if(driverId) {
         // Update UI
@@ -30,8 +33,8 @@ function connect(event) {
         connectionStatus.classList.remove('hidden');
 
         // Update driver info
-        driverNameElement.textContent = driverId;
-        userAvatar.textContent = driverId.charAt(0).toUpperCase();
+        driverNameElement.textContent = driverName;
+        userAvatar.textContent = driverName.charAt(0).toUpperCase();
 
         // Connect to WebSocket
         const socket = new SockJS('http://localhost:8778/ws');
@@ -64,6 +67,7 @@ function onConnected() {
         {},
         JSON.stringify({
             driverId: driverId,
+            driverName : driverName,
             status: 'ONLINE',
             timestamp: new Date().toISOString()
         })
@@ -88,7 +92,7 @@ function onRideRequestReceived(payload) {
     // Store the request using bookingId
     const bookingId = rideRequest.bookingId;
     console.log('Booking id: ', bookingId);
-    rideRequests.set(bookingId, rideRequest);
+    rideRequests.set(String(bookingId), rideRequest);
 
     // Display the request
     displayRideRequest(rideRequest);
@@ -120,7 +124,7 @@ function onPublicMessageReceived(payload) {
 
     // Handle driver status updates
     if (message.driverId && message.status) {
-        console.log(`Driver ${message.driverId} is ${message.status}`);
+        console.log(`Driver ${message.driverName} is ${message.status}`);
     }
 }
 
@@ -162,10 +166,10 @@ function displayRideRequest(request) {
 
     // Calculate distance and fare
     const distance = calculateDistance(
-        request.pickupPoint.latitude,
-        request.pickupPoint.longitude,
-        request.dropPoint.latitude,
-        request.dropPoint.longitude
+        request.pickupLocation.latitude,
+        request.pickupLocation.longitude,
+        request.dropLocation.latitude,
+        request.dropLocation.longitude
     );
     const estimatedFare = calculateEstimatedFare(distance);
 
@@ -189,8 +193,8 @@ function displayRideRequest(request) {
                 <div>
                     <strong>Pickup Location:</strong><br>
                     <span style="font-size: 14px; color: #666;">
-                        Lat: ${request.pickupPoint.latitude.toFixed(6)},
-                        Lng: ${request.pickupPoint.longitude.toFixed(6)}
+                        Lat: ${request.pickupLocation.latitude.toFixed(6)},
+                        Lng: ${request.pickupLocation.longitude.toFixed(6)}
                     </span>
                 </div>
             </div>
@@ -199,8 +203,8 @@ function displayRideRequest(request) {
                 <div>
                     <strong>Drop Location:</strong><br>
                     <span style="font-size: 14px; color: #666;">
-                        Lat: ${request.dropPoint.latitude.toFixed(6)},
-                        Lng: ${request.dropPoint.longitude.toFixed(6)}
+                        Lat: ${request.dropLocation.latitude.toFixed(6)},
+                        Lng: ${request.dropLocation.longitude.toFixed(6)}
                     </span>
                 </div>
             </div>
@@ -265,6 +269,7 @@ function acceptRide(bookingId) {
                 requestId: bookingId.toString(), // Using bookingId as requestId
                 bookingId: bookingId,
                 driverId: driverId,
+                driverName: driverName,
                 status: 'ACCEPTED',
                 timestamp: new Date().toISOString()
             })
@@ -313,6 +318,7 @@ function declineRide(bookingId) {
                 requestId: bookingId.toString(), // Using bookingId as requestId
                 bookingId: bookingId,
                 driverId: driverId,
+                driverName: driverName,
                 reason: 'Driver unavailable',
                 timestamp: new Date().toISOString()
             })
@@ -365,6 +371,7 @@ function disconnect() {
             {},
             JSON.stringify({
                 driverId: driverId,
+                driverName: driverName,
                 status: 'OFFLINE',
                 timestamp: new Date().toISOString()
             })

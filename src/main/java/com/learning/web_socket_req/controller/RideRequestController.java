@@ -36,9 +36,10 @@ public class RideRequestController {
     @SendTo("/topic/public")
     public DriverStatus driverConnect(@Payload DriverStatus status, SimpMessageHeaderAccessor headerAccessor) {
         String sessionID = headerAccessor.getSessionId();
-        String driverId = status.getDriverId();
+        Long driverId = status.getDriverId();
+        String driverName = status.getDriverName();
         sessionHandler.putDriverIdWithSession(driverId, sessionID);
-        System.out.println("Driver connected: " + status.getDriverId());
+        System.out.println("Driver connected: " + driverName);
         headerAccessor.getSessionAttributes().put("driverId", driverId);
         return status;
     }
@@ -47,7 +48,7 @@ public class RideRequestController {
     @MessageMapping("/driver.disconnect")
     @SendTo("/topic/public")
     public DriverStatus driverDisconnect(@Payload DriverStatus status) {
-        System.out.println("Driver disconnected: " + status.getDriverId());
+        System.out.println("Driver disconnected: " + status.getDriverName());
         return status;
     }
 
@@ -55,8 +56,9 @@ public class RideRequestController {
     @MessageMapping("/ride.accept")
     public void acceptRide(@Payload RideAcceptDto response) {
         String requestId = response.getRequestId();
-        String bookingId = response.getBookingId();
-        String driverId = response.getDriverId();
+        Long bookingId = response.getBookingId();
+        Long driverId = response.getDriverId();
+        String driverName = response.getDriverName();
         String status = String.valueOf(response.getStatus());
         Timestamp timestamp = response.getTimestamp();
         System.out.println("Ride accepted by: " + driverId);
@@ -85,9 +87,9 @@ public class RideRequestController {
     @PostMapping("/notify")
     public String sendRideRequestToDriver(@RequestBody RideRequestDto request) {
         System.out.println("Request" + request.toString());
-        Map<String, String> activeDrivers = sessionHandler.getAllConnectedDrivers();
-        for (Map.Entry<String, String> e : activeDrivers.entrySet()) {
-            String driverId = e.getKey();
+        Map<Long, String> activeDrivers = sessionHandler.getAllConnectedDrivers();
+        for (Map.Entry<Long, String> e : activeDrivers.entrySet()) {
+            Long driverId = e.getKey();
             String sessionId = e.getValue();
             messagingTemplate.convertAndSendToUser(
                     sessionId,

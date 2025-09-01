@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class DriverStatus {
-    private String driverId;
+    private Long driverId;
+    private String driverName;
 }

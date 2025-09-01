@@ -7,13 +7,13 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class WebSocketSessionHandler {
     // store session by driver id
-    private final Map<String, String> driverSession = new ConcurrentHashMap<>();
+    private final Map<Long, String> driverSession = new ConcurrentHashMap<>();
 
-    public void putDriverIdWithSession(String driverId, String sessionId){
+    public void putDriverIdWithSession(Long driverId, String sessionId){
         driverSession.put(driverId,sessionId);
     }
 
-    public Map<String,String> getAllConnectedDrivers(){
+    public Map<Long,String> getAllConnectedDrivers(){
         return driverSession;
     }
 }

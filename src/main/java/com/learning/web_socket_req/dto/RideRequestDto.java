@@ -14,8 +14,8 @@ import lombok.Setter;
 
 
 public class RideRequestDto {
-    private String bookingId;
-    private Location pickupPoint;
-    private Location dropPoint;
+    private Long bookingId;
+    private Location pickupLocation;
+    private Location dropLocation;
 
 }

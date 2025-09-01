@@ -36,6 +36,8 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     // local entity service
     implementation 'com.learning:entityService:1.0.4'
+    // https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-netflix-eureka-client
+    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:4.3.0")
 
 }
 

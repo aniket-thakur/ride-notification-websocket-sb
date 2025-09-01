@@ -11,8 +11,9 @@ import java.sql.Timestamp;
 @Builder
 public class RideAcceptDto {
   private String requestId;
-  private String bookingId;
-  private String driverId;
+  private Long bookingId;
+  private Long driverId;
+  private String driverName;
   private Status status;
   private Timestamp timestamp;
 }
